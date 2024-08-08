@@ -12,7 +12,7 @@ namespace API.Controllers;
 
 
 
-[AllowAnonymous]
+[Authorize]
 public class UsersController(IUserRepository userRepository) : BaseApiController
 {
 
