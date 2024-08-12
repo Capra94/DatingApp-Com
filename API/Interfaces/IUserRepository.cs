@@ -4,6 +4,7 @@
 
 using API.DTOs;
 using API.Entities;
+using API.Helpers;
 
 namespace API;
 
@@ -16,7 +17,7 @@ public interface IUserRepository
     Task<AppUser?> GetUserByIdAsync(int id);
     Task<AppUser?> GetUserByUsernameAsync(string username);
 
-    Task<IEnumerable<MemberDTO>> GetMemebersAsync();
+    Task<PagedList<MemberDTO>> GetMemebersAsync(UserParams userParams);
 
     Task<MemberDTO?> GetMemberAsync(String username);
 }

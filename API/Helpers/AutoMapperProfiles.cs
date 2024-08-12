@@ -2,6 +2,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using AutoMapper;
+using Microsoft.VisualBasic;
 
 namespace API.Helpers;
 
@@ -18,6 +19,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<Photo, PhotoDto>();
         CreateMap<MemberUpdateDTO, AppUser>();
         CreateMap<RegisterDTO, AppUser>();
-        CreateMap<string, DateOnly>().ConvertUsing(s => DateOnly.Parse(s));
+        CreateMap<string, DateOnly>().ConvertUsing(s => DateOnly.Parse(s.Substring(0,10)));
     }
 }

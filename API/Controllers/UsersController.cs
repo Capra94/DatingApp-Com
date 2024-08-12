@@ -7,6 +7,7 @@ using API.Interfaces;
 using API.Extensions;
 using Microsoft.AspNetCore.Components.Web;
 using API.Entities;
+using API.Helpers;
 
 
 
@@ -21,9 +22,14 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
 
     [HttpGet]
 
-    public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers([FromQuery]UserParams userParams)
     {
-        var users = await userRepository.GetMemebersAsync();
+
+        userParams.CurrentUsername = User.GetUsername();
+
+        var users = await userRepository.GetMemebersAsync(userParams);
+
+        Response.AddPaginationHeader(users);
 
         return Ok(users);
     }
