@@ -20,4 +20,5 @@ public interface IUserRepository
     Task<PagedList<MemberDTO>> GetMemebersAsync(UserParams userParams);
 
     Task<MemberDTO?> GetMemberAsync(String username);
+    
 }
