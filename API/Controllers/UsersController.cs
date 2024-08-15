@@ -8,6 +8,7 @@ using API.Extensions;
 using Microsoft.AspNetCore.Components.Web;
 using API.Entities;
 using API.Helpers;
+using API.Data;
 
 
 
@@ -16,7 +17,7 @@ namespace API.Controllers;
 
 
 [Authorize]
-public class UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService) : BaseApiController
+public class UsersController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService) : BaseApiController
 {
 
     
@@ -26,7 +27,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
 
         userParams.CurrentUsername = User.GetUsername();
 
-        var users = await userRepository.GetMemebersAsync(userParams);
+        var users = await unitOfWork.UserRepository.GetMemebersAsync(userParams);
 
         Response.AddPaginationHeader(users);
 
@@ -39,7 +40,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
 
     public async Task<ActionResult<MemberDTO>> GetUsers(string username)
     {
-        var user = await userRepository.GetMemberAsync(username);
+        var user = await unitOfWork.UserRepository.GetMemberAsync(username);
 
         if (user == null)
         {
@@ -54,7 +55,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
     public async Task<ActionResult> UpdateUser(MemberUpdateDTO memberUpdateDTO)
     {
 
-        var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
         if (user == null)
         {
@@ -63,7 +64,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
 
         mapper.Map(memberUpdateDTO, user);
 
-        if (await userRepository.SaveAllAsync())
+        if (await unitOfWork.Complete())
         {
             return NoContent();
         };
@@ -76,7 +77,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
     [HttpPost("add-photo")]
     public async Task<ActionResult<PhotoDto>> AddPhoto(IFormFile file)
     {
-        var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
         if (user == null)
         {
@@ -104,7 +105,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
 
         user.Photos.Add(photo);
 
-        if (await userRepository.SaveAllAsync())
+        if (await unitOfWork.Complete())
         {
             return CreatedAtAction(nameof(GetUsers),
                 new { username = user.UserName }, mapper.Map<PhotoDto>(photo));
@@ -119,7 +120,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
     [HttpPut("set-main-photo/{photoId:int}")]
     public async Task<ActionResult> SetMainPhoto(int photoId)
     {
-        var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
         if (user == null)
         {
@@ -142,7 +143,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
         photo.IsMain = true;
 
 
-        if (await userRepository.SaveAllAsync())
+        if (await unitOfWork.Complete())
         {
             return NoContent();
         }
@@ -153,7 +154,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
     [HttpDelete("delete-photo/{photoId:int}")]
     public async Task<ActionResult> DeletePhoto(int photoId)
     {
-        var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
         if (user == null)
         {
@@ -179,7 +180,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
 
         user.Photos.Remove(photo);
 
-        if (await userRepository.SaveAllAsync())
+        if (await unitOfWork.Complete())
         {
             return Ok();
         }
